@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    restart: unless-stopped
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      APP_ENV: ${APP_ENV}
+      PORT: ${PORT}
+      URLSHORTENER_DB_HOST: ${URLSHORTENER_DB_HOST}
+      URLSHORTENER_DB_PORT: ${URLSHORTENER_DB_PORT}
+      URLSHORTENER_DB_DATABASE: ${URLSHORTENER_DB_DATABASE}
+      URLSHORTENER_DB_USERNAME: ${URLSHORTENER_DB_USERNAME}
+      URLSHORTENER_DB_PASSWORD: ${URLSHORTENER_DB_PASSWORD}
+      URLSHORTENER_DB_SCHEMA: ${URLSHORTENER_DB_SCHEMA}
+    depends_on:
+      psql:
+        condition: service_healthy
+    networks:
+      - urlshortener
+  psql:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${URLSHORTENER_DB_DATABASE}
+      POSTGRES_USER: ${URLSHORTENER_DB_USERNAME}
+      POSTGRES_PASSWORD: ${URLSHORTENER_DB_PASSWORD}
+    ports:
+      - "${URLSHORTENER_DB_PORT}:5432"
+    volumes:
+      - psql_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${URLSHORTENER_DB_USERNAME} -d ${URLSHORTENER_DB_DATABASE}'"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - urlshortener
+
+volumes:
+  psql_volume:
+networks:
+  urlshortener:

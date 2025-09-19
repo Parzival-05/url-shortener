@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"url-shortener/internal/server"
+	"github.com/Parzival-05/url-shortener/internal/server"
 
 	"go.uber.org/zap"
 )

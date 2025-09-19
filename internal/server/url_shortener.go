@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"url-shortener/internal/domain"
-	"url-shortener/internal/server/io_server"
+	"github.com/Parzival-05/url-shortener/internal/domain"
+	"github.com/Parzival-05/url-shortener/internal/server/io_server"
 
 	"github.com/go-chi/render"
 	"go.uber.org/zap"

@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"url-shortener/internal/database"
-	"url-shortener/internal/database/sql"
+	"github.com/Parzival-05/url-shortener/internal/database"
+	"github.com/Parzival-05/url-shortener/internal/database/sql"
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"

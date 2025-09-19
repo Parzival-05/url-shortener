@@ -8,7 +8,7 @@ import (
 	"github.com/sqids/sqids-go"
 	"go.uber.org/zap"
 
-	"url-shortener/internal/logger/zap_utils"
+	"github.com/Parzival-05/url-shortener/internal/logger/zap_utils"
 )
 
 var (

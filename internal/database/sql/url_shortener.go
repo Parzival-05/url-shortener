@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"url-shortener/internal/domain"
+	"github.com/Parzival-05/url-shortener/internal/domain"
 
 	"gorm.io/gorm"
 )

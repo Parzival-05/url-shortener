@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"url-shortener/internal/domain"
+	"github.com/Parzival-05/url-shortener/internal/domain"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"

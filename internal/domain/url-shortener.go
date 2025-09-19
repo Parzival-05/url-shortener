@@ -13,7 +13,7 @@ import (
 
 var (
 	ErrUrlNotFound = errors.New("url not found")
-	ErrInvalidUrl  = errors.New("Invalid shorten url")
+	ErrInvalidUrl  = errors.New("invalid shorten url")
 )
 
 type UrlRepository interface {

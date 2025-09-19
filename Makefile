@@ -61,4 +61,8 @@ watch:
             fi; \
         fi
 
+lint:
+	@echo "Linting..."
+	@golangci-lint run
+
 .PHONY: all build run test clean watch docker-run docker-down itest

@@ -2,24 +2,25 @@ package server
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
 	"url-shortener/internal/database"
 	"url-shortener/internal/database/sql"
 
 	_ "github.com/joho/godotenv/autoload"
+	"go.uber.org/zap"
 )
 
 type Server struct {
 	port int
-	log  *slog.Logger
+	log  *zap.Logger
 	db   database.DBService
 }
 
-func NewServer(log *slog.Logger) *http.Server {
+func NewServer(log *zap.Logger) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port: port,

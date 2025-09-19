@@ -2,24 +2,26 @@ package server
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
-	"url-shortener/internal/logger/sl"
+
+	"url-shortener/internal/logger/zap_utils"
 	"url-shortener/internal/server/io_server"
 
 	"github.com/go-chi/render"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type ErrorContext struct {
 	w   http.ResponseWriter
 	r   *http.Request
-	log *slog.Logger
+	log *zap.Logger
 }
 
 type ErrorInfo struct {
 	err      error
 	code     int
-	logLevel slog.Level
+	logLevel zapcore.Level
 	msg      string
 }
 
@@ -33,15 +35,16 @@ func errorResponse(errContext ErrorContext, errInfo ErrorInfo) {
 	logLevel := errInfo.logLevel
 	msg := errInfo.msg
 
+	zapErrMsg := zap_utils.Err(err)
 	switch logLevel {
-	case slog.LevelInfo:
-		log.Info(msg, sl.Err(err))
-	case slog.LevelDebug:
-		log.Debug(msg, sl.Err(err))
-	case slog.LevelWarn:
-		log.Warn(msg, sl.Err(err))
-	case slog.LevelError:
-		log.Error(msg, sl.Err(err))
+	case zap.InfoLevel:
+		log.Info(msg, zapErrMsg)
+	case zap.DebugLevel:
+		log.Debug(msg, zapErrMsg)
+	case zap.WarnLevel:
+		log.Warn(msg, zapErrMsg)
+	case zap.ErrorLevel:
+		log.Error(msg, zapErrMsg)
 	}
 	w.WriteHeader(code)
 	var output string

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,6 +11,8 @@ import (
 	"time"
 
 	"url-shortener/internal/server"
+
+	"go.uber.org/zap"
 )
 
 var (
@@ -46,7 +47,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 
 func main() {
 	log := setupLogger(os.Getenv("APP_ENV"))
-	log.Info("Starting server...", slog.String("app_env", os.Getenv("APP_ENV")))
+	log.Info("Starting server...", zap.String("app_env", os.Getenv("APP_ENV")))
 	server := server.NewServer(log)
 
 	// Create a done channel to signal when the shutdown is complete
@@ -65,13 +66,20 @@ func main() {
 	log.Info("Graceful shutdown complete.")
 }
 
-func setupLogger(appEnv string) *slog.Logger {
-	var log *slog.Logger
+func setupLogger(appEnv string) *zap.Logger {
+	var logger *zap.Logger
+	var err error
+
 	switch appEnv {
 	case appEnvLocal:
-		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		logger, err = zap.NewDevelopment()
 	case appEnvProd:
-		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+		logger, err = zap.NewProduction()
+	default:
+		logger, err = zap.NewDevelopment()
 	}
-	return log
+	if err != nil {
+		log.Fatalf("failed to create logger: %v", err)
+	}
+	return logger
 }

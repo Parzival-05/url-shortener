@@ -2,16 +2,13 @@ package server
 
 import (
 	"errors"
-	"log/slog"
 	"net/http"
+
 	"url-shortener/internal/domain"
 	"url-shortener/internal/server/io_server"
 
 	"github.com/go-chi/render"
-)
-
-var (
-	ErrInvalidRequest = errors.New("Invalid request")
+	"go.uber.org/zap"
 )
 
 func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +28,7 @@ func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 		errorResponse(errContext, ErrorInfo{
 			err:      err,
 			code:     http.StatusBadRequest,
-			logLevel: slog.LevelDebug,
+			logLevel: zap.DebugLevel,
 			msg:      "Failed to decode request body",
 		})
 		return
@@ -43,7 +40,7 @@ func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 				ErrorInfo{
 					err:      err,
 					code:     http.StatusInternalServerError,
-					logLevel: slog.LevelError,
+					logLevel: zap.ErrorLevel,
 				})
 			return
 		}
@@ -57,7 +54,7 @@ func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 		errorResponse(errContext, ErrorInfo{
 			err:      err,
 			code:     http.StatusInternalServerError,
-			logLevel: slog.LevelError,
+			logLevel: zap.ErrorLevel,
 			msg:      "Failed to save shorten url",
 		})
 		return
@@ -68,14 +65,14 @@ func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 			errorResponse(errContext, ErrorInfo{
 				err:      err,
 				code:     http.StatusInternalServerError,
-				logLevel: slog.LevelError,
+				logLevel: zap.ErrorLevel,
 			})
 			return
 		} else {
 			errorResponse(errContext, ErrorInfo{
 				err:      err,
 				code:     http.StatusInternalServerError,
-				logLevel: slog.LevelError,
+				logLevel: zap.ErrorLevel,
 				msg:      "Shorten url was not found after saving?!",
 			})
 			return
@@ -102,7 +99,7 @@ func (s *Server) GetUrl(w http.ResponseWriter, r *http.Request) {
 		errorResponse(errContext, ErrorInfo{
 			err:      err,
 			code:     http.StatusBadRequest,
-			logLevel: slog.LevelDebug,
+			logLevel: zap.DebugLevel,
 			msg:      "Failed to decode request body",
 		})
 		return
@@ -112,7 +109,7 @@ func (s *Server) GetUrl(w http.ResponseWriter, r *http.Request) {
 		errorResponse(errContext, ErrorInfo{
 			err:      err,
 			code:     http.StatusInternalServerError,
-			logLevel: slog.LevelError,
+			logLevel: zap.ErrorLevel,
 			msg:      "Failed to get full url",
 		})
 		return

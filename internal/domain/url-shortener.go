@@ -3,11 +3,12 @@ package domain
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"os"
-	"url-shortener/internal/logger/sl"
 
 	"github.com/sqids/sqids-go"
+	"go.uber.org/zap"
+
+	"url-shortener/internal/logger/zap_utils"
 )
 
 var (
@@ -23,10 +24,10 @@ type UrlRepository interface {
 
 type UrlShortener struct {
 	urlRepo UrlRepository
-	log     *slog.Logger
+	log     *zap.Logger
 }
 
-func NewUrlShortener(urlRepo UrlRepository, log *slog.Logger) *UrlShortener {
+func NewUrlShortener(urlRepo UrlRepository, log *zap.Logger) *UrlShortener {
 	return &UrlShortener{
 		urlRepo: urlRepo,
 		log:     log,
@@ -39,12 +40,12 @@ func (u *UrlShortener) encodeID(id int64) (string, error) {
 		MinLength: 10,
 	})
 	if err != nil {
-		u.log.Error("failed to create squid: %v", sl.Err(err))
+		u.log.Error("failed to create squid: %v", zap_utils.Err(err))
 		return "", err
 	}
 	shortUrl, err := s.Encode([]uint64{uint64(id)})
 	if err != nil {
-		u.log.Error("failed to encode id: %v", sl.Err(err))
+		u.log.Error("failed to encode id: %v", zap_utils.Err(err))
 		return "", err
 	}
 	return shortUrl, err
@@ -57,7 +58,7 @@ func (u *UrlShortener) decodeToID(str string) (int64, error) {
 		MinLength: 10,
 	})
 	if err != nil {
-		u.log.Error("failed to create squid: %v", sl.Err(err))
+		u.log.Error("failed to create squid: %v", zap_utils.Err(err))
 		return 0, err
 	}
 	numbers := s.Decode(str)

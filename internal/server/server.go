@@ -2,29 +2,32 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+	"url-shortener/internal/database"
+	"url-shortener/internal/database/sql"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"url-shortener/internal/database"
 )
 
 type Server struct {
 	port int
-
-	db database.Service
+	log  *slog.Logger
+	db   database.DBService
 }
 
-func NewServer() *http.Server {
+func NewServer(log *slog.Logger) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port: port,
-
-		db: database.New(),
+		log:  log,
+		db:   sql.New(),
 	}
+	NewServer.db.SyncDB()
+
 	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),

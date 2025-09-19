@@ -10,6 +10,14 @@ require (
 )
 
 require (
+	github.com/ajg/form v1.5.1 // indirect
+	github.com/go-chi/render v1.0.3 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/sqids/sqids-go v0.4.1 // indirect
+)
+
+require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -72,4 +80,6 @@ require (
 	google.golang.org/grpc v1.75.0 // indirect
 	google.golang.org/protobuf v1.36.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/postgres v1.6.0
+	gorm.io/gorm v1.31.0
 )

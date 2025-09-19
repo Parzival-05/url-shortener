@@ -4,12 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"url-shortener/internal/server"
+)
+
+var (
+	appEnvLocal = "local"
+	appEnvProd  = "prod"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -38,8 +45,9 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
-
-	server := server.NewServer()
+	log := setupLogger(os.Getenv("APP_ENV"))
+	log.Info("Starting server...", slog.String("app_env", os.Getenv("APP_ENV")))
+	server := server.NewServer(log)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
@@ -54,5 +62,16 @@ func main() {
 
 	// Wait for the graceful shutdown to complete
 	<-done
-	log.Println("Graceful shutdown complete.")
+	log.Info("Graceful shutdown complete.")
+}
+
+func setupLogger(appEnv string) *slog.Logger {
+	var log *slog.Logger
+	switch appEnv {
+	case appEnvLocal:
+		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	case appEnvProd:
+		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	}
+	return log
 }

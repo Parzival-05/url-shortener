@@ -11,7 +11,7 @@ jobs:
         with:
           go-version: stable
       - name: Install dependencies
-        run: go get .
+        run: go mod tidy
       - name: Build
         run: go build -v ./...
       - name: Test with the Go CLI

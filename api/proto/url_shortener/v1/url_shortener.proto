@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package url_shortener;
+
+option go_package = "github.com/Parzival-05/url-shortener/api/gen/url_shortener/v1;url_shortener_v1";
+
+service UrlShortenerService {
+  // CreateShortURL creates a short URL from a original URL
+  rpc CreateShortURL(CreateShortURLRequest) returns (CreateShortURLResponse);
+  // GetOriginalURL retrieves the original URL from a short URL
+  rpc GetOriginalURL(GetOriginalURLRequest) returns (GetOriginalURLResponse);
+}
+
+message CreateShortURLRequest {
+  string url = 1;
+}
+
+message GetOriginalURLRequest {
+  string short_url = 1;
+}
+
+message CreateShortURLResponse {
+  string short_url = 1;
+}
+
+message GetOriginalURLResponse {
+  string url = 1;
+}

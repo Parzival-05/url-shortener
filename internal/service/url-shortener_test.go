@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/Parzival-05/url-shortener/internal/database"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
@@ -183,7 +184,7 @@ func TestUrlShortener_CreateUrl(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for receiver constructor.
-		urlRepo UrlRepository
+		urlRepo database.IUrlRepository
 		log     *zap.Logger
 		// Named input parameters for target function.
 		fullUrl string

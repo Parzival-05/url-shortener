@@ -33,7 +33,7 @@ func mustStartPostgresContainer() (func(context.Context, ...testcontainers.Termi
 		return nil, err
 	}
 
-	database = dbName
+	db = dbName
 	password = dbPwd
 	username = dbUser
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/Parzival-05/url-shortener/internal/database"
 	"github.com/sqids/sqids-go"
 	"go.uber.org/zap"
 )
@@ -14,21 +15,23 @@ var (
 	ErrInvalidUrl  = errors.New("invalid shorten url")
 )
 
-type UrlRepository interface {
-	// GetID returns the ID for a given URL
-	GetID(ctx context.Context, fullUrl string) (id int64, err error)
-	// GetUrlByID returns the full URL for a given ID
-	GetUrlByID(ctx context.Context, id int64) (fullUrl string, err error)
-	// SaveUrl saves a new URL
-	SaveUrl(ctx context.Context, fullUrl string) (err error)
+type IUrlShortener interface {
+	// GetShortenUrl returns the shorten URL for a given full URL
+	GetShortenUrl(ctx context.Context, fullUrl string) (string, error)
+	// SaveShortenUrl saves a new shorten URL
+	SaveShortenUrl(ctx context.Context, fullUrl string) error
+	// GetFullUrl returns the full URL for a given shorten URL
+	GetFullUrl(ctx context.Context, shortenUrl string) (string, error)
+	// CreateUrl creates a new short link for a given URL or returns the existing
+	CreateUrl(ctx context.Context, fullUrl string) (string, error)
 }
 
 type UrlShortener struct {
-	urlRepo UrlRepository
+	urlRepo database.IUrlRepository
 	log     *zap.Logger
 }
 
-func NewUrlShortener(urlRepo UrlRepository, log *zap.Logger) *UrlShortener {
+func NewUrlShortener(urlRepo database.IUrlRepository, log *zap.Logger) *UrlShortener {
 	return &UrlShortener{
 		urlRepo: urlRepo,
 		log:     log,

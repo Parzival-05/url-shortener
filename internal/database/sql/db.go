@@ -8,8 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Parzival-05/url-shortener/internal/service"
-
+	"github.com/Parzival-05/url-shortener/internal/database"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"
@@ -22,7 +21,7 @@ type dbService struct {
 }
 
 var (
-	database   = os.Getenv("URLSHORTENER_DB_DATABASE")
+	db         = os.Getenv("URLSHORTENER_DB_DATABASE")
 	password   = os.Getenv("URLSHORTENER_DB_PASSWORD")
 	username   = os.Getenv("URLSHORTENER_DB_USERNAME")
 	port       = os.Getenv("URLSHORTENER_DB_PORT")
@@ -35,7 +34,7 @@ func New() *dbService {
 	if dbInstance != nil {
 		return dbInstance
 	}
-	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%v sslmode=disable", host, username, password, database, port)
+	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%v sslmode=disable", host, username, password, db, port)
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{NamingStrategy: schema.NamingStrategy{
 		SingularTable: true,
 	}})
@@ -47,7 +46,7 @@ func New() *dbService {
 	}
 	return dbInstance
 }
-func (s *dbService) NewUrlRepository() service.UrlRepository {
+func (s *dbService) NewUrlRepository() database.IUrlRepository {
 	return NewUrlRepositoryPG(*s)
 }
 
@@ -135,6 +134,6 @@ func (s *dbService) Close() error {
 	if err != nil {
 		log.Fatalf("Failed to get underlying sql.DB: %v", err)
 	}
-	log.Printf("Disconnected from database: %s", database)
+	log.Printf("Disconnected from database: %s", db)
 	return sqlDB.Close()
 }

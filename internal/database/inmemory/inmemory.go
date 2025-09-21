@@ -3,6 +3,7 @@ package inmemory
 import (
 	"context"
 
+	"github.com/Parzival-05/url-shortener/internal/database"
 	"github.com/Parzival-05/url-shortener/internal/service"
 )
 
@@ -27,7 +28,7 @@ func (m *InMemoryDBService) Close() error {
 func (m *InMemoryDBService) SyncDB() {
 }
 
-func (m *InMemoryDBService) NewUrlRepository() service.UrlRepository {
+func (m *InMemoryDBService) NewUrlRepository() database.IUrlRepository {
 	return NewInMemoryUrlRepository()
 }
 

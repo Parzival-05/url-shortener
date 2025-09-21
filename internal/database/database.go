@@ -1,6 +1,8 @@
 package database
 
-import  "github.com/Parzival-05/url-shortener/internal/service"
+import (
+	"context"
+)
 
 // DBService represents a service that interacts with a database.
 type DBService interface {
@@ -14,5 +16,14 @@ type DBService interface {
 
 	SyncDB()
 
-	NewUrlRepository() service.UrlRepository
+	NewUrlRepository() IUrlRepository
+}
+
+type IUrlRepository interface {
+	// GetID returns the ID for a given URL
+	GetID(ctx context.Context, fullUrl string) (id int64, err error)
+	// GetUrlByID returns the full URL for a given ID
+	GetUrlByID(ctx context.Context, id int64) (fullUrl string, err error)
+	// SaveUrl saves a new URL
+	SaveUrl(ctx context.Context, fullUrl string) (err error)
 }

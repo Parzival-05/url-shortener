@@ -1,0 +1,98 @@
+definitions:
+  io_server.CreateUrlRequest:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
+  io_server.CreateUrlResponse:
+    properties:
+      shorten_url:
+        type: string
+    required:
+    - shorten_url
+    type: object
+  io_server.GetUrlResponse:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
+info:
+  contact: {}
+  description: This is a simple service to shorten URLs.
+  license:
+    name: MIT
+    url: https://github.com/Parzival-05/url-shortener/blob/main/LICENSE
+  title: URL Shortener API
+  version: "1.0"
+paths:
+  /shorten:
+    get:
+      description: Retrieves the original, full URL for a given short link code.
+      parameters:
+      - description: The 10-character short code
+        format: string
+        in: query
+        name: shorten_url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the original URL
+          schema:
+            $ref: '#/definitions/io_server.GetUrlResponse'
+        "400":
+          description: Bad Request - The short code is invalid or was not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get original URL
+      tags:
+      - URL Shortener
+    post:
+      consumes:
+      - application/json
+      description: Creates a new short link for a given URL. If the URL already exists,
+        it returns the existing short link.
+      parameters:
+      - description: URL to be shortened
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/io_server.CreateUrlRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully created or retrieved the short URL
+          schema:
+            $ref: '#/definitions/io_server.CreateUrlResponse'
+        "400":
+          description: Bad Request - Invalid JSON format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a short URL
+      tags:
+      - URL Shortener
+swagger: "2.0"

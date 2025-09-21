@@ -22,8 +22,8 @@ var (
 )
 
 func main() {
-	storageType := flag.String("storage", string(server.Memory), fmt.Sprintf("Тип хранилища: '%s' или '%s'", string(server.Memory), string(server.Postgres)))
-	help := flag.Bool("help", false, "Показать справку")
+	storageType := flag.String("storage", string(server.InMemory), fmt.Sprintf("Storage type: '%s' or '%s'", string(server.InMemory), string(server.Postgres)))
+	help := flag.Bool("help", false, "help")
 	flag.Parse()
 
 	if *help {
@@ -32,9 +32,9 @@ func main() {
 	}
 	ParseStorageType := func(storageType string) server.StorageType {
 		switch storageType {
-		case "memory":
-			return server.Memory
-		case "postgres":
+		case string(server.InMemory):
+			return server.InMemory
+		case string(server.Postgres):
 			return server.Postgres
 		default:
 			panic("unknown storage type")
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	log := setupLogger(os.Getenv("APP_ENV"))
-	log.Info("Starting server...", zap.String("app_env", os.Getenv("APP_ENV")))
+	log.Info("Starting server...", zap.String("app_env", os.Getenv("APP_ENV")), zap.String("storage", *storageType))
 	server := server.NewServer(log, ParseStorageType(*storageType))
 
 	// Create a done channel to signal when the shutdown is complete

@@ -1,8 +1,10 @@
 # Simple Makefile for a Go project
 ENTRYPOINT = cmd/api/main.go
+GO_FILES := $(shell find cmd internal -type f -name '*.go')
+SWAGGER_FILE := docs/docs.go
 
 # Build the application
-all: build test
+all: generate build test
 
 build:
 	@echo "Building..."
@@ -10,16 +12,17 @@ build:
 	@go build -o main $(ENTRYPOINT)
 
 # Run the application
-run:
+run: generate
 	@echo "Running..."
 
-	@make generate	
 	@go run $(ENTRYPOINT) $(ARGS)
 
-generate:
-	@if [ ! -f ./docs/swagger.json ]; then echo "Generating swagger..." \
-	&& swag init -g $(ENTRYPOINT); \
-	fi
+# Generate the swagger file
+generate: $(SWAGGER_FILE)
+
+$(SWAGGER_FILE): $(GO_FILES)
+	@echo "Generating swagger..."
+	@swag init -g $(ENTRYPOINT)
 
 # Create DB container
 docker-run:
@@ -49,25 +52,8 @@ clean:
 	@echo "Cleaning..."
 	@rm -r bin
 
-# Live Reload
-watch:
-	@if command -v air > /dev/null; then \
-            air; \
-            echo "Watching...";\
-        else \
-            read -p "Go's 'air' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
-            if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
-                go install github.com/air-verse/air@latest; \
-                air; \
-                echo "Watching...";\
-            else \
-                echo "You chose not to install air. Exiting..."; \
-                exit 1; \
-            fi; \
-        fi
-
 lint:
 	@echo "Linting..."
 	@golangci-lint run
 
-.PHONY: all build run test clean watch docker-run docker-down generate
+.PHONY: all build test clean watch docker-run docker-down

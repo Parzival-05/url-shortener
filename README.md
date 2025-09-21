@@ -61,11 +61,6 @@ Shutdown DB Container
 make docker-down
 ```
 
-Live reload the application:
-```bash
-make watch
-```
-
 Run the test suite:
 ```bash
 make test

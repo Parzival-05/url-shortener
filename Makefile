@@ -30,7 +30,7 @@ docker-run:
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose up --build; \
+		docker compose up --build; \
 	fi
 
 # Shutdown DB container
@@ -50,7 +50,7 @@ test:
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -r bin
+	@rm -r main
 
 lint:
 	@echo "Linting..."

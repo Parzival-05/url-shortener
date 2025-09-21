@@ -33,7 +33,7 @@ type Server struct {
 type StorageType string
 
 const (
-	Memory   StorageType = "memory"
+	InMemory StorageType = "inmemory"
 	Postgres StorageType = "postgres"
 )
 

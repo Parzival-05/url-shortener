@@ -167,9 +167,10 @@ func TestServer_CreateUrl(t *testing.T) {
 				data, exists := response["data"]
 				assert.True(t, exists)
 
-				dataBytes, _ := json.Marshal(data)
+				dataBytes, err := json.Marshal(data)
+				assert.NoError(t, err)
 				var actualResp io_server.CreateUrlResponse
-				err := json.Unmarshal(dataBytes, &actualResp)
+				err = json.Unmarshal(dataBytes, &actualResp)
 				assert.NoError(t, err)
 
 				assert.Equal(t, tt.expected.resp.ShortenURL, actualResp.ShortenURL)
@@ -279,7 +280,8 @@ func TestServer_GetUrl(t *testing.T) {
 
 			contentBytes := tt.w.Body.Bytes()
 			var content map[string]any
-			json.Unmarshal(contentBytes, &content)
+			err := json.Unmarshal(contentBytes, &content)
+			assert.NoError(t, err)
 
 			code := tt.w.Result().StatusCode
 			assert.Equal(t, tt.expected.code, code)

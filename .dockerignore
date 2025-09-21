@@ -1,0 +1,24 @@
+# Ignore Git-related files
+.git
+.gitignore
+
+# Ignore local development environment files
+.env
+.DS_Store # macOS specific
+.vscode/ # VS Code configuration
+
+# Ignore Go-specific build artifacts and caches
+*.exe # Windows executables
+*.test # Go test binaries
+*.prof # Go profiling files
+vendor # If you're not vendoring dependencies inside the image, or handling them in a multi-stage build
+go.mod.sum # Can be ignored if go.mod is included and dependencies are managed within the Dockerfile
+go.sum # Can be ignored if go.mod is included and dependencies are managed within the Dockerfile
+
+# Ignore temporary files and logs
+tmp/
+log/
+*.log
+
+# Ignore IDE-specific files
+.idea/ # IntelliJ IDEA

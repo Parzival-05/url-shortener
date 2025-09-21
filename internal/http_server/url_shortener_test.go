@@ -1,4 +1,4 @@
-package server
+package http_server
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/Parzival-05/url-shortener/internal/domain"
-	"github.com/Parzival-05/url-shortener/internal/server/io_server"
+	"github.com/Parzival-05/url-shortener/internal/http_server/io_server"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

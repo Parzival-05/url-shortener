@@ -1,11 +1,11 @@
-package server
+package http_server
 
 import (
 	"fmt"
 	"net/http"
 
+	"github.com/Parzival-05/url-shortener/internal/http_server/io_server"
 	"github.com/Parzival-05/url-shortener/internal/logger/zap_utils"
-	"github.com/Parzival-05/url-shortener/internal/server/io_server"
 
 	"github.com/go-chi/render"
 	"go.uber.org/zap"

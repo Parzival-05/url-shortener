@@ -12,7 +12,7 @@ import (
 	"time"
 
 	_ "github.com/Parzival-05/url-shortener/docs"
-	"github.com/Parzival-05/url-shortener/internal/server"
+	"github.com/Parzival-05/url-shortener/internal/http_server"
 
 	"go.uber.org/zap"
 )
@@ -29,7 +29,7 @@ var (
 // @license.name	MIT
 // @license.url	https://github.com/Parzival-05/url-shortener/blob/main/LICENSE
 func main() {
-	storageType := flag.String("storage", string(server.InMemory), fmt.Sprintf("Storage type: '%s' or '%s'", string(server.InMemory), string(server.Postgres)))
+	storageType := flag.String("storage", string(http_server.InMemory), fmt.Sprintf("Storage type: '%s' or '%s'", string(http_server.InMemory), string(http_server.Postgres)))
 	help := flag.Bool("help", false, "help")
 	flag.Parse()
 
@@ -37,12 +37,12 @@ func main() {
 		flag.Usage()
 		os.Exit(0)
 	}
-	ParseStorageType := func(storageType string) server.StorageType {
+	ParseStorageType := func(storageType string) http_server.StorageType {
 		switch storageType {
-		case string(server.InMemory):
-			return server.InMemory
-		case string(server.Postgres):
-			return server.Postgres
+		case string(http_server.InMemory):
+			return http_server.InMemory
+		case string(http_server.Postgres):
+			return http_server.Postgres
 		default:
 			panic("unknown storage type")
 		}
@@ -50,7 +50,7 @@ func main() {
 
 	log := setupLogger(os.Getenv("APP_ENV"))
 	log.Info("Starting server...", zap.String("app_env", os.Getenv("APP_ENV")), zap.String("storage", *storageType))
-	server := server.NewServer(log, ParseStorageType(*storageType))
+	server := http_server.NewServer(log, ParseStorageType(*storageType))
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)

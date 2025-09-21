@@ -36,7 +36,6 @@ func New() *service {
 		return dbInstance
 	}
 	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%v sslmode=disable", host, username, password, database, port)
-	fmt.Println(connStr)
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{NamingStrategy: schema.NamingStrategy{
 		SingularTable: true,
 	}})

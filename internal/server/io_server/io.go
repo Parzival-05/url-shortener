@@ -3,6 +3,7 @@ package io_server
 type Response struct {
 	Status string `json:"status"`
 	Error  string `json:"error,omitempty"`
+	Data   any    `json:"data,inline"`
 }
 
 const (
@@ -10,9 +11,10 @@ const (
 	StatusError = "Error"
 )
 
-func OK() Response {
+func OK(data interface{}) Response {
 	return Response{
 		Status: StatusOK,
+		Data:   data,
 	}
 }
 

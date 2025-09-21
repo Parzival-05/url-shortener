@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -8,24 +9,45 @@ import (
 	"time"
 
 	"github.com/Parzival-05/url-shortener/internal/database"
-	"github.com/Parzival-05/url-shortener/internal/database/sql"
+	"github.com/Parzival-05/url-shortener/internal/database/inmemory"
+	"github.com/Parzival-05/url-shortener/internal/domain"
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
 )
 
+type IUrlShortener interface {
+	GetShortenUrl(ctx context.Context, fullUrl string) (string, error)
+	SaveShortenUrl(ctx context.Context, fullUrl string) error
+	GetFullUrl(ctx context.Context, shortenUrl string) (string, error)
+}
+
 type Server struct {
 	port int
 	log  *zap.Logger
 	db   database.DBService
+
+	urlShortener IUrlShortener
 }
 
-func NewServer(log *zap.Logger) *http.Server {
+type StorageType string
+
+const (
+	Memory   StorageType = "memory"
+	Postgres StorageType = "postgres"
+)
+
+func NewServer(log *zap.Logger, storageType StorageType) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	db := inmemory.NewInMemoryDBService()
+	urlRepo := db.NewUrlRepository()
+	urlShortener := domain.NewUrlShortener(urlRepo, log)
+
 	NewServer := &Server{
-		port: port,
-		log:  log,
-		db:   sql.New(),
+		port:         port,
+		log:          log,
+		db:           db,
+		urlShortener: urlShortener,
 	}
 	NewServer.db.SyncDB()
 

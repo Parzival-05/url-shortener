@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type ErrorContext struct {
+type RequestContext struct {
 	w   http.ResponseWriter
 	r   *http.Request
 	log *zap.Logger
@@ -25,10 +25,15 @@ type ErrorInfo struct {
 	msg      string
 }
 
-func errorResponse(errContext ErrorContext, errInfo ErrorInfo) {
-	log := errContext.log
-	w := errContext.w
-	r := errContext.r
+type ResponseInfo struct {
+	code int
+	data interface{} `json:"data"`
+}
+
+func errorResponse(rq RequestContext, errInfo ErrorInfo) {
+	log := rq.log
+	w := rq.w
+	r := rq.r
 
 	err := errInfo.err
 	code := errInfo.code
@@ -54,4 +59,12 @@ func errorResponse(errContext ErrorContext, errInfo ErrorInfo) {
 		output = fmt.Sprintf(msg, err.Error())
 	}
 	render.JSON(w, r, io_server.Error(output))
+}
+
+func okResponse(rc RequestContext, ri ResponseInfo) {
+	w := rc.w
+	r := rc.r
+
+	w.WriteHeader(ri.code)
+	render.JSON(w, r, io_server.OK(ri.data))
 }

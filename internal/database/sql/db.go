@@ -77,6 +77,7 @@ func (s *service) Health() map[string]string {
 	defer cancel()
 
 	stats := make(map[string]string)
+	stats["db_service"] = "sql"
 
 	sqlDB, err := s.db.DB()
 	if err != nil {

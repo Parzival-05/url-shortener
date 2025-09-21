@@ -20,6 +20,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 	r.Post("/shorten", s.CreateUrl)
+	r.Get("/shorten", s.GetUrl)
 
 	r.Get("/health", s.healthHandler)
 

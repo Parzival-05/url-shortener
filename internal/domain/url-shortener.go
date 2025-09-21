@@ -7,8 +7,6 @@ import (
 
 	"github.com/sqids/sqids-go"
 	"go.uber.org/zap"
-
-	"github.com/Parzival-05/url-shortener/internal/logger/zap_utils"
 )
 
 var (
@@ -34,31 +32,28 @@ func NewUrlShortener(urlRepo UrlRepository, log *zap.Logger) *UrlShortener {
 	}
 }
 
-func (u *UrlShortener) encodeID(id int64) (string, error) {
+func encodeID(id int64) (string, error) {
 	s, err := sqids.New(sqids.Options{
 		Alphabet:  os.Getenv("SECRET_ALPHABET"),
 		MinLength: 10,
 	})
 	if err != nil {
-		u.log.Error("failed to create squid: %v", zap_utils.Err(err))
 		return "", err
 	}
 	shortUrl, err := s.Encode([]uint64{uint64(id)})
 	if err != nil {
-		u.log.Error("failed to encode id: %v", zap_utils.Err(err))
 		return "", err
 	}
 	return shortUrl, err
 }
 
-func (u *UrlShortener) decodeToID(str string) (int64, error) {
+func decodeToID(str string) (int64, error) {
 	var id int64
 	s, err := sqids.New(sqids.Options{
 		Alphabet:  os.Getenv("SECRET_ALPHABET"),
 		MinLength: 10,
 	})
 	if err != nil {
-		u.log.Error("failed to create squid: %v", zap_utils.Err(err))
 		return 0, err
 	}
 	numbers := s.Decode(str)
@@ -74,7 +69,7 @@ func (u *UrlShortener) GetShortenUrl(ctx context.Context, fullUrl string) (strin
 	if err != nil {
 		return "", err
 	}
-	return u.encodeID(id)
+	return encodeID(id)
 }
 
 func (u *UrlShortener) SaveShortenUrl(ctx context.Context, fullUrl string) error {
@@ -83,7 +78,7 @@ func (u *UrlShortener) SaveShortenUrl(ctx context.Context, fullUrl string) error
 }
 
 func (u *UrlShortener) GetFullUrl(ctx context.Context, shortenUrl string) (string, error) {
-	id, err := u.decodeToID(shortenUrl)
+	id, err := decodeToID(shortenUrl)
 	if err != nil {
 		return "", err
 	}

@@ -9,9 +9,18 @@ build:
 	
 	@go build -o main cmd/api/main.go
 
+
+ifeq (run,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "run"
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # ...and turn them into do-nothing targets
+  $(eval $(RUN_ARGS):;@:)
+endif
+
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@go run cmd/api/main.go $(RUN_ARGS)
+
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \

@@ -4,6 +4,13 @@ import (
 	"context"
 )
 
+type StorageType string
+
+const (
+	InMemory StorageType = "inmemory"
+	Postgres StorageType = "postgres"
+)
+
 // DBService represents a service that interacts with a database.
 type DBService interface {
 	// Health returns a map of health status information.

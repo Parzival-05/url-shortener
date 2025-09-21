@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,15 +13,45 @@ import (
 	"time"
 
 	_ "github.com/Parzival-05/url-shortener/docs"
+	"github.com/Parzival-05/url-shortener/internal/database"
+	"github.com/Parzival-05/url-shortener/internal/database/inmemory"
+	"github.com/Parzival-05/url-shortener/internal/database/sql"
+	"github.com/Parzival-05/url-shortener/internal/grpc"
 	"github.com/Parzival-05/url-shortener/internal/http_server"
+	"github.com/Parzival-05/url-shortener/internal/service"
 
 	"go.uber.org/zap"
+	google_grpc "google.golang.org/grpc"
 )
 
 var (
 	appEnvLocal = "local"
 	appEnvProd  = "prod"
 )
+
+type ServerType string
+
+const (
+	httpServer ServerType = "http"
+	grpcServer ServerType = "grpc"
+)
+
+type Server interface {
+	Shutdown(ctx context.Context) error
+}
+
+type HttpServer struct {
+	*http.Server
+}
+
+type GrpcServer struct {
+	*google_grpc.Server
+}
+
+func (g *GrpcServer) Shutdown(ctx context.Context) error {
+	g.GracefulStop()
+	return nil
+}
 
 //	@title			URL Shortener API
 //	@version		1.0
@@ -29,7 +60,8 @@ var (
 // @license.name	MIT
 // @license.url	https://github.com/Parzival-05/url-shortener/blob/main/LICENSE
 func main() {
-	storageType := flag.String("storage", string(http_server.InMemory), fmt.Sprintf("Storage type: '%s' or '%s'", string(http_server.InMemory), string(http_server.Postgres)))
+	serverTypeS := flag.String("server", string(httpServer), fmt.Sprintf("Type of server to run: '%s', '%s'", string(httpServer), string(grpcServer)))
+	storageTypeS := flag.String("storage", string(database.InMemory), fmt.Sprintf("Storage type: '%s' or '%s'", string(database.InMemory), string(database.Postgres)))
 	help := flag.Bool("help", false, "help")
 	flag.Parse()
 
@@ -37,30 +69,65 @@ func main() {
 		flag.Usage()
 		os.Exit(0)
 	}
-	ParseStorageType := func(storageType string) http_server.StorageType {
+	ParseStorageType := func(storageType string) database.StorageType {
 		switch storageType {
-		case string(http_server.InMemory):
-			return http_server.InMemory
-		case string(http_server.Postgres):
-			return http_server.Postgres
+		case string(database.InMemory):
+			return database.InMemory
+		case string(database.Postgres):
+			return database.Postgres
 		default:
 			panic("unknown storage type")
 		}
 	}
 
+	ParseServerType := func(serverType string) ServerType {
+		switch serverType {
+		case string(httpServer):
+			return httpServer
+		case string(grpcServer):
+			return grpcServer
+		default:
+			panic("unknown server type")
+		}
+	}
+
 	log := setupLogger(os.Getenv("APP_ENV"))
-	log.Info("Starting server...", zap.String("app_env", os.Getenv("APP_ENV")), zap.String("storage", *storageType))
-	server := http_server.NewServer(log, ParseStorageType(*storageType))
+	log.Info("Starting server...", zap.String("app_env", os.Getenv("APP_ENV")), zap.String("storage", *storageTypeS), zap.String("server_type", *serverTypeS))
+	storageType := ParseStorageType(*storageTypeS)
+	var db database.DBService
+	if storageType == database.Postgres {
+		db = sql.New()
+	} else {
+		db = inmemory.NewInMemoryDBService()
+	}
+	db.SyncDB()
+	urlRepo := db.NewUrlRepository()
+	urlShortener := service.NewUrlShortener(urlRepo, log)
+	serverType := ParseServerType(*serverTypeS)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
+	if serverType == httpServer {
+		server := http_server.NewServer(log, db, urlShortener)
 
-	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+		// Run graceful shutdown in a separate goroutine
+		go gracefulShutdown(server, done)
 
-	err := server.ListenAndServe()
-	if err != nil && err != http.ErrServerClosed {
-		panic(fmt.Sprintf("http server error: %s", err))
+		err := server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			panic(fmt.Sprintf("http server error: %s", err))
+		}
+	} else {
+		grpcApi := grpc.NewServerAPI(log, urlShortener)
+		var listener net.Listener
+		grpcServer, listener := grpc.New(log, grpcApi)
+
+		// Run graceful shutdown in a separate goroutine
+		go gracefulShutdown(&GrpcServer{Server: grpcServer}, done)
+
+		if err := grpcServer.Serve(listener); err != nil {
+			log.Fatal("gRPC server failed to start", zap.Error(err))
+		}
 	}
 
 	// Wait for the graceful shutdown to complete
@@ -86,7 +153,7 @@ func setupLogger(appEnv string) *zap.Logger {
 	return logger
 }
 
-func gracefulShutdown(apiServer *http.Server, done chan bool) {
+func gracefulShutdown(apiServer Server, done chan bool) {
 	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

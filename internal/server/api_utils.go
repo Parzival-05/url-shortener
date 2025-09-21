@@ -27,7 +27,7 @@ type ErrorInfo struct {
 
 type ResponseInfo struct {
 	code int
-	data interface{} `json:"data"`
+	data interface{}
 }
 
 func errorResponse(rq RequestContext, errInfo ErrorInfo) {

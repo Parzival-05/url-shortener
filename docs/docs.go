@@ -19,6 +19,37 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/health": {
+            "get": {
+                "description": "get the status of server",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Show the status of server",
+                "responses": {
+                    "200": {
+                        "description": "Successful health check",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "503": {
+                        "description": "Service is unavailable",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/shorten": {
             "get": {
                 "description": "Retrieves the original, full URL for a given short link code.",

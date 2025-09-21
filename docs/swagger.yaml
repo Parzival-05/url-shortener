@@ -29,6 +29,27 @@ info:
   title: URL Shortener API
   version: "1.0"
 paths:
+  /health:
+    get:
+      consumes:
+      - '*/*'
+      description: get the status of server
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful health check
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service is unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Show the status of server
+      tags:
+      - Health
   /shorten:
     get:
       description: Retrieves the original, full URL for a given short link code.

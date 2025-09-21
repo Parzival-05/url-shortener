@@ -31,6 +31,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 	return r
 }
 
+// @Summary      Show the status of server
+// @Description  get the status of server
+// @Tags         Health
+// @Accept       */*
+// @Produce      json
+// @Success      200 {object} map[string]interface{} "Successful health check"
+// @Failure      503 {object} map[string]interface{} "Service is unavailable"
+// @Router       /health [get]
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, _ := json.Marshal(s.db.Health())
 	_, _ = w.Write(jsonResp)

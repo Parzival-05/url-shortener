@@ -1,4 +1,5 @@
 # Simple Makefile for a Go project
+ENTRYPOINT = cmd/api/main.go
 
 # Build the application
 all: build test
@@ -6,13 +7,19 @@ all: build test
 build:
 	@echo "Building..."
 	
-	
-	@go build -o main cmd/api/main.go
-
+	@go build -o main $(ENTRYPOINT)
 
 # Run the application
 run:
-	@go run cmd/api/main.go $(ARGS)
+	@echo "Running..."
+
+	@make generate	
+	@go run $(ENTRYPOINT) $(ARGS)
+
+generate:
+	@if [ ! -f ./docs/swagger.json ]; then echo "Generating swagger..." \
+	&& swag init -g $(ENTRYPOINT); \
+	fi
 
 # Create DB container
 docker-run:
@@ -63,4 +70,4 @@ lint:
 	@echo "Linting..."
 	@golangci-lint run
 
-.PHONY: all build run test clean watch docker-run docker-down 
+.PHONY: all build run test clean watch docker-run docker-down generate

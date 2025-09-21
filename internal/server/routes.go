@@ -2,11 +2,13 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -23,21 +25,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Get("/shorten", s.GetUrl)
 
 	r.Get("/health", s.healthHandler)
-
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", s.port)), //The url pointing to API definition
+	))
 	return r
 }
-
-// func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-// 	resp := make(map[string]string)
-// 	resp["message"] = "Hello World"
-
-// 	jsonResp, err := json.Marshal(resp)
-// 	if err != nil {
-// 		log.Fatalf("error handling JSON marshal. Err: %v", err)
-// 	}
-
-// 	_, _ = w.Write(jsonResp)
-// }
 
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, _ := json.Marshal(s.db.Health())

@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/Parzival-05/url-shortener/docs"
 	"github.com/Parzival-05/url-shortener/internal/server"
 
 	"go.uber.org/zap"
@@ -21,6 +22,12 @@ var (
 	appEnvProd  = "prod"
 )
 
+//	@title			URL Shortener API
+//	@version		1.0
+//	@description	This is a simple service to shorten URLs.
+
+// @license.name	MIT
+// @license.url	https://github.com/Parzival-05/url-shortener/blob/main/LICENSE
 func main() {
 	storageType := flag.String("storage", string(server.InMemory), fmt.Sprintf("Storage type: '%s' or '%s'", string(server.InMemory), string(server.Postgres)))
 	help := flag.Bool("help", false, "help")

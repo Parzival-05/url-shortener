@@ -14,6 +14,16 @@ import (
 
 var decoder = schema.NewDecoder()
 
+// @Summary		Create a short URL
+// @Description	Creates a new short link for a given URL. If the URL already exists, it returns the existing short link.
+// @Tags			URL Shortener
+// @Accept			json
+// @Produce		json
+// @Param			request	body		io_server.CreateUrlRequest	true	"URL to be shortened"
+// @Success		200		{object}	io_server.CreateUrlResponse	"Successfully created or retrieved the short URL"
+// @Failure		400		{object}	map[string]string			"Bad Request - Invalid JSON format"
+// @Failure		500		{object}	map[string]string			"Internal Server Error"
+// @Router			/shorten [post]
 func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -92,6 +102,15 @@ func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 		data: resp})
 }
 
+// @Summary		Get original URL
+// @Description	Retrieves the original, full URL for a given short link code.
+// @Tags			URL Shortener
+// @Produce		json
+// @Param			shorten_url	query		string						true	"The 10-character short code"	Format(string)
+// @Success		200			{object}	io_server.GetUrlResponse	"Successfully retrieved the original URL"
+// @Failure		400			{object}	map[string]string			"Bad Request - The short code is invalid or was not found"
+// @Failure		500			{object}	map[string]string			"Internal Server Error"
+// @Router			/shorten [get]
 func (s *Server) GetUrl(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

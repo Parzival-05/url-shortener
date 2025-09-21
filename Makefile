@@ -34,15 +34,11 @@ docker-down:
 test:
 	@echo "Testing..."
 	@go test ./... -v
-# Integrations Tests for the application
-itest:
-	@echo "Running integration tests..."
-	@go test ./internal/database -v
 
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -r bin
 
 # Live Reload
 watch:
@@ -65,4 +61,4 @@ lint:
 	@echo "Linting..."
 	@golangci-lint run
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run test clean watch docker-run docker-down 

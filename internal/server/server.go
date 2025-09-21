@@ -10,6 +10,7 @@ import (
 
 	"github.com/Parzival-05/url-shortener/internal/database"
 	"github.com/Parzival-05/url-shortener/internal/database/inmemory"
+	"github.com/Parzival-05/url-shortener/internal/database/sql"
 	"github.com/Parzival-05/url-shortener/internal/domain"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -39,7 +40,12 @@ const (
 
 func NewServer(log *zap.Logger, storageType StorageType) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	db := inmemory.NewInMemoryDBService()
+	var db database.DBService
+	if storageType == Postgres {
+		db = sql.New()
+	} else {
+		db = inmemory.NewInMemoryDBService()
+	}
 	urlRepo := db.NewUrlRepository()
 	urlShortener := domain.NewUrlShortener(urlRepo, log)
 

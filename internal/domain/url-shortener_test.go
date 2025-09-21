@@ -2,25 +2,13 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
 )
-
-func (u *UrlRepositoryMock) GetID(ctx context.Context, fullUrl string) (id int64, err error) {
-	args := u.Called(ctx, fullUrl)
-	return int64(args.Int(0)), args.Error(1)
-}
-
-func (u *UrlRepositoryMock) GetUrlByID(ctx context.Context, id int64) (fullUrl string, err error) {
-	args := u.Called(ctx, id)
-	return args.String(0), args.Error(1)
-}
-
-func (u *UrlRepositoryMock) SaveUrl(ctx context.Context, fullUrl string) (err error) {
-	args := u.Called(ctx, fullUrl)
-	return args.Error(0)
-}
 
 func TestUrlShortener_GetShortenUrl(t *testing.T) {
 	ctx := context.Background()
@@ -29,16 +17,16 @@ func TestUrlShortener_GetShortenUrl(t *testing.T) {
 	mockedGetID := "GetID"
 	urlRepo := new(UrlRepositoryMock)
 	// Test case 1: URL is found in the database
-	argFullUrlTC1 := "https://fullUrl1.com"
-	mockResTC1Id := 1
-	var mockResTC1Err error = nil
-	urlRepo.On(mockedGetID, ctx, argFullUrlTC1).Return(mockResTC1Id, mockResTC1Err).Once()
+	argFullUrl1 := "https://fullUrl1.com"
+	mockRes1Id := 1
+	var mockRes1Err error = nil
+	urlRepo.On(mockedGetID, ctx, argFullUrl1).Return(mockRes1Id, mockRes1Err).Once()
 
 	// Test case 2: URL is not found in the database
-	argFullUrlTC2 := "https://fullUrl2.com"
-	mockResTC2Id := 0
-	mockResTC2Err := ErrUrlNotFound
-	urlRepo.On(mockedGetID, ctx, argFullUrlTC2).Return(mockResTC2Id, mockResTC2Err).Once()
+	argFullUrl2 := "https://fullUrl2.com"
+	mockRes2Id := 0
+	mockRes2Err := ErrUrlNotFound
+	urlRepo.On(mockedGetID, ctx, argFullUrl2).Return(mockRes2Id, mockRes2Err).Once()
 
 	shortUrl, err := encodeID(1)
 	if err != nil {
@@ -54,13 +42,13 @@ func TestUrlShortener_GetShortenUrl(t *testing.T) {
 	}{
 		{
 			name:    "Test case 1: URL is found in the database",
-			fullUrl: argFullUrlTC1,
+			fullUrl: argFullUrl1,
 			want:    shortUrl,
 			wantErr: false,
 		},
 		{
 			name:    "Test case 2: URL is not found in the database",
-			fullUrl: argFullUrlTC2,
+			fullUrl: argFullUrl2,
 			want:    "",
 			wantErr: true,
 		},
@@ -93,24 +81,24 @@ func TestUrlShortener_GetFullUrl(t *testing.T) {
 	urlRepo := new(UrlRepositoryMock)
 
 	// Test case 1: URL is found in the database
-	mockArgTC1Id := int64(1)
-	mockResTC1Url := "https://fullUrl1.com"
-	var mockResTC1Err error = nil
-	urlRepo.On(mockedGetUrlByID, ctx, mockArgTC1Id).Return(mockResTC1Url, mockResTC1Err).Once()
-	argTC1ShortenUrl, err := encodeID(mockArgTC1Id)
+	mockArg1Id := int64(1)
+	mockRes1Url := "https://fullUrl1.com"
+	var mockRes1Err error = nil
+	urlRepo.On(mockedGetUrlByID, ctx, mockArg1Id).Return(mockRes1Url, mockRes1Err).Once()
+	arg1ShortenUrl, err := encodeID(mockArg1Id)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Test case 2: URL is not found in the database
-	mockArgTC2Id := int64(2)
+	mockArg2Id := int64(2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	mockResTC2Url := ""
-	mockResTC2Err := ErrUrlNotFound
-	urlRepo.On(mockedGetUrlByID, ctx, mockArgTC2Id).Return(mockResTC2Url, mockResTC2Err).Once()
-	argTC2ShortenUrl, err := encodeID(mockArgTC2Id)
+	mockRes2Url := ""
+	mockRes2Err := ErrUrlNotFound
+	urlRepo.On(mockedGetUrlByID, ctx, mockArg2Id).Return(mockRes2Url, mockRes2Err).Once()
+	arg2ShortenUrl, err := encodeID(mockArg2Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,14 +112,14 @@ func TestUrlShortener_GetFullUrl(t *testing.T) {
 	}{
 		{
 			name:       "URL is found in the database",
-			shortenUrl: argTC1ShortenUrl,
-			want:       mockResTC1Url,
+			shortenUrl: arg1ShortenUrl,
+			want:       mockRes1Url,
 			wantErr:    false,
 		},
 		{
 			name:       "URL is not found in the database",
-			shortenUrl: argTC2ShortenUrl,
-			want:       mockResTC2Url,
+			shortenUrl: arg2ShortenUrl,
+			want:       mockRes2Url,
 			wantErr:    true,
 		},
 	}
@@ -150,6 +138,93 @@ func TestUrlShortener_GetFullUrl(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetFullUrl() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUrlShortener_CreateUrl(t *testing.T) {
+	mockLog := zaptest.NewLogger(t)
+	ctx := context.Background()
+
+	mockedGetID := "GetID"
+	mockedSaveUrl := "SaveUrl"
+	urlRepository := new(UrlRepositoryMock)
+
+	// Test case 1: URL is found in the database
+	mockArg1Url := "https://fullUrl1.com"
+	mockRes1Id := 1
+	var mockRes1Err error = nil
+	urlRepository.On(mockedGetID, ctx, mockArg1Url).Return(mockRes1Id, mockRes1Err).Once()
+	mockRes1ShortUrl, err := encodeID(int64(mockRes1Id))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Test case 2: URL is not found in the database
+	mockArg2Url := "https://fullUrl2.com"
+	mockRes2Id := 2
+	var mockRes2Err error = nil
+	// First call -- URL not found
+	urlRepository.On(mockedGetID, ctx, mockArg2Url).Return(0, ErrUrlNotFound).Once()
+	// Save URL
+	urlRepository.On(mockedSaveUrl, ctx, mockArg2Url).Return(nil).Once()
+	// Second call -- URL found
+	urlRepository.On(mockedGetID, ctx, mockArg2Url).Return(mockRes2Id, mockRes2Err).Once()
+	mockRes2ShortUrl, err := encodeID(int64(mockRes2Id))
+
+	// Test case 3: Error on save
+	mockArgTC3Url := "https://fullUrl3.com"
+	// First call -- URL not found
+	urlRepository.On(mockedGetID, ctx, mockArgTC3Url).Return(0, ErrUrlNotFound).Once()
+	// Error on save
+	urlRepository.On(mockedSaveUrl, ctx, mockArgTC3Url).Return(errors.New("save error")).Once()
+	mockResTC3Res := ""
+
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for receiver constructor.
+		urlRepo UrlRepository
+		log     *zap.Logger
+		// Named input parameters for target function.
+		fullUrl string
+		want    string
+		err     error
+	}{
+		// Test case 1: URL is found in the database
+		{
+			name:    "Test case 1: URL is found in the database",
+			urlRepo: urlRepository,
+			log:     mockLog,
+			fullUrl: mockArg1Url,
+			want:    mockRes1ShortUrl,
+			err:     mockRes1Err,
+		},
+		// Test case 2: URL is not found in the database
+		{
+			name:    "Test case 2: URL is not found in the database",
+			urlRepo: urlRepository,
+			log:     mockLog,
+			fullUrl: mockArg2Url,
+			want:    mockRes2ShortUrl,
+			err:     mockRes2Err,
+		},
+		// Test case 3: Error on save
+		{
+			name:    "Test case 3: Error on save",
+			urlRepo: urlRepository,
+			log:     mockLog,
+			fullUrl: mockArgTC3Url,
+			want:    mockResTC3Res,
+			err:     errors.New("save error"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := NewUrlShortener(tt.urlRepo, tt.log)
+			got, err := u.CreateUrl(ctx, tt.fullUrl)
+			assert.Equal(t, tt.err, err)
+			if got != tt.want {
+				t.Errorf("UrlShortener.CreateUrl() = %v, want %v", got, tt.want)
 			}
 		})
 	}

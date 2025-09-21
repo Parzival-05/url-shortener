@@ -15,8 +15,11 @@ var (
 )
 
 type UrlRepository interface {
+	// GetID returns the ID for a given URL
 	GetID(ctx context.Context, fullUrl string) (id int64, err error)
+	// GetUrlByID returns the full URL for a given ID
 	GetUrlByID(ctx context.Context, id int64) (fullUrl string, err error)
+	// SaveUrl saves a new URL
 	SaveUrl(ctx context.Context, fullUrl string) (err error)
 }
 
@@ -83,4 +86,20 @@ func (u *UrlShortener) GetFullUrl(ctx context.Context, shortenUrl string) (strin
 		return "", err
 	}
 	return u.urlRepo.GetUrlByID(ctx, id)
+}
+
+func (u *UrlShortener) CreateUrl(ctx context.Context, fullUrl string) (string, error) {
+	shortenUrl, err := u.GetShortenUrl(ctx, fullUrl)
+	if err != nil {
+		if !errors.Is(err, ErrUrlNotFound) {
+			return "", err
+		}
+	} else {
+		return shortenUrl, nil
+	}
+	err = u.SaveShortenUrl(ctx, fullUrl)
+	if err != nil {
+		return "", err
+	}
+	return u.GetShortenUrl(ctx, fullUrl)
 }

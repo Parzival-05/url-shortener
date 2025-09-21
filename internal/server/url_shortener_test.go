@@ -37,6 +37,12 @@ func (m *UrlShortenerMock) GetFullUrl(ctx context.Context, shortenUrl string) (s
 	arg := m.Called(ctx, shortenUrl)
 	return arg.String(0), arg.Error(1)
 }
+
+func (m *UrlShortenerMock) CreateUrl(ctx context.Context, fullUrl string) (string, error) {
+	arg := m.Called(ctx, fullUrl)
+	return arg.String(0), arg.Error(1)
+}
+
 func structToMapJSON(obj interface{}) (map[string]interface{}, error) {
 	var result map[string]interface{}
 	jsonBytes, err := json.Marshal(obj)
@@ -63,11 +69,11 @@ func TestServer_CreateUrl(t *testing.T) {
 
 	ctx := context.Background()
 	urlShortener := new(UrlShortenerMock)
-
+	createUrl := "CreateUrl"
 	// Test case 1: URL exists
 	mockArgTC1Url := "https://fullUrl1.com"
 	mockResTC1ShortUrl := "abc123"
-	urlShortener.On("GetShortenUrl", ctx, mockArgTC1Url).Return(mockResTC1ShortUrl, nil)
+	urlShortener.On(createUrl, ctx, mockArgTC1Url).Return(mockResTC1ShortUrl, nil)
 
 	arg1 := io_server.CreateUrlRequest{URL: mockArgTC1Url}
 	w1, r1 := createPostRequest(arg1)
@@ -75,22 +81,14 @@ func TestServer_CreateUrl(t *testing.T) {
 	// Test case 2: URL not exists, save and get
 	mockArgTC2Url := "https://fullUrl2.com"
 	mockResTC2ShortUrl := "def456"
-	// First call -- URL not found
-	urlShortener.On("GetShortenUrl", ctx, mockArgTC2Url).Return("", domain.ErrUrlNotFound).Once()
-	// Save URL
-	urlShortener.On("SaveShortenUrl", ctx, mockArgTC2Url).Return(nil).Once()
-	// Second call -- URL found
-	urlShortener.On("GetShortenUrl", ctx, mockArgTC2Url).Return(mockResTC2ShortUrl, nil).Once()
+	urlShortener.On(createUrl, ctx, mockArgTC2Url).Return(mockResTC2ShortUrl, nil).Once()
 
 	arg2 := io_server.CreateUrlRequest{URL: mockArgTC2Url}
 	w2, r2 := createPostRequest(arg2)
 
 	// Test case 3: Error on save
 	mockArgTC3Url := "https://fullUrl3.com"
-	// First call -- URL not found
-	urlShortener.On("GetShortenUrl", ctx, mockArgTC3Url).Return("", domain.ErrUrlNotFound).Once()
-	// Error on save
-	urlShortener.On("SaveShortenUrl", ctx, mockArgTC3Url).Return(errors.New("save error")).Once()
+	urlShortener.On(createUrl, ctx, mockArgTC3Url).Return("", errors.New("Failed to save shorten url")).Once()
 
 	arg3 := io_server.CreateUrlRequest{URL: mockArgTC3Url}
 	w3, r3 := createPostRequest(arg3)

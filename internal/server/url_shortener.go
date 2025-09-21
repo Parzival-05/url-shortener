@@ -44,62 +44,23 @@ func (s *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	shortenUrl, err := urlShortener.GetShortenUrl(ctx, req.URL)
+	shortenUrl, err := urlShortener.CreateUrl(ctx, req.URL)
 	if err != nil {
-		if !errors.Is(err, domain.ErrUrlNotFound) {
-			errorResponse(rc,
-				ErrorInfo{
-					err:      err,
-					code:     http.StatusInternalServerError,
-					logLevel: zap.ErrorLevel,
-				})
-			return
-		}
-	} else {
-		resp := io_server.CreateUrlResponse{
-			ShortenURL: shortenUrl,
-		}
-		okResponse(rc, ResponseInfo{
-			code: http.StatusOK,
-			data: resp,
-		})
-		return
-	}
-	err = urlShortener.SaveShortenUrl(ctx, req.URL)
-	if err != nil {
-		errorResponse(rc, ErrorInfo{
-			err:      err,
-			code:     http.StatusInternalServerError,
-			logLevel: zap.ErrorLevel,
-			msg:      "Failed to save shorten url",
-		})
-		return
-	}
-	shortenUrl, err = urlShortener.GetShortenUrl(ctx, req.URL)
-	if err != nil {
-		if !errors.Is(err, domain.ErrUrlNotFound) {
-			errorResponse(rc, ErrorInfo{
+		errorResponse(rc,
+			ErrorInfo{
 				err:      err,
 				code:     http.StatusInternalServerError,
 				logLevel: zap.ErrorLevel,
 			})
-			return
-		} else {
-			errorResponse(rc, ErrorInfo{
-				err:      err,
-				code:     http.StatusInternalServerError,
-				logLevel: zap.ErrorLevel,
-				msg:      "Shorten url was not found after saving?!",
-			})
-			return
-		}
+		return
 	}
 	resp := io_server.CreateUrlResponse{
 		ShortenURL: shortenUrl,
 	}
 	okResponse(rc, ResponseInfo{
 		code: http.StatusOK,
-		data: resp})
+		data: resp,
+	})
 }
 
 // @Summary		Get original URL

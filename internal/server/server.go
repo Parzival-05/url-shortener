@@ -18,9 +18,14 @@ import (
 )
 
 type IUrlShortener interface {
+	// GetShortenUrl returns the shorten URL for a given full URL
 	GetShortenUrl(ctx context.Context, fullUrl string) (string, error)
+	// SaveShortenUrl saves a new shorten URL
 	SaveShortenUrl(ctx context.Context, fullUrl string) error
+	// GetFullUrl returns the full URL for a given shorten URL
 	GetFullUrl(ctx context.Context, shortenUrl string) (string, error)
+	// CreateUrl creates a new short link for a given URL or returns the existing
+	CreateUrl(ctx context.Context, fullUrl string) (string, error)
 }
 
 type Server struct {

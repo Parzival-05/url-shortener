@@ -6,14 +6,14 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-
-RUN go build -o main cmd/api/main.go
+RUN apk update && apk add make
+RUN make build
 
 FROM alpine:3.20.1 AS prod
 WORKDIR /app
 COPY --from=build /app/main /app/main
 EXPOSE ${PORT}
 
-CMD ["make run --storage postgres"]
+ENTRYPOINT ["/app/main", "--storage", "postgres"]
 
 

@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Parzival-05/url-shortener/internal/domain"
 	"github.com/Parzival-05/url-shortener/internal/http_server/io_server"
+	"github.com/Parzival-05/url-shortener/internal/service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -213,7 +213,7 @@ func TestServer_GetUrl(t *testing.T) {
 	// Test case 2: URL is not found in the database
 	mockArgTC2Url := "notShortenUrl"
 	mockResTC2Url := ""
-	mockResTC2Err := domain.ErrUrlNotFound
+	mockResTC2Err := service.ErrUrlNotFound
 	urlShortener.On(mockedGetFullUrl, ctx, mockArgTC2Url).Return(mockResTC2Url, mockResTC2Err).Once()
 	arg = io_server.GetUrlRequest{
 		ShortenURL: mockArgTC2Url,
@@ -222,7 +222,7 @@ func TestServer_GetUrl(t *testing.T) {
 	res2 := io_server.GetUrlResponse{
 		URL: mockResTC2Url,
 	}
-	err2 := domain.ErrUrlNotFound
+	err2 := service.ErrUrlNotFound
 	code2 := http.StatusBadRequest
 
 	server := Server{

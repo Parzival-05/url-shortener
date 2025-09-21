@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Parzival-05/url-shortener/internal/domain"
+	"github.com/Parzival-05/url-shortener/internal/service"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-type service struct {
+type dbService struct {
 	db *gorm.DB
 }
 
@@ -27,10 +27,10 @@ var (
 	username   = os.Getenv("URLSHORTENER_DB_USERNAME")
 	port       = os.Getenv("URLSHORTENER_DB_PORT")
 	host       = os.Getenv("URLSHORTENER_DB_HOST")
-	dbInstance *service
+	dbInstance *dbService
 )
 
-func New() *service {
+func New() *dbService {
 	// Reuse Connection
 	if dbInstance != nil {
 		return dbInstance
@@ -42,16 +42,16 @@ func New() *service {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbInstance = &service{
+	dbInstance = &dbService{
 		db: db,
 	}
 	return dbInstance
 }
-func (s *service) NewUrlRepository() domain.UrlRepository {
+func (s *dbService) NewUrlRepository() service.UrlRepository {
 	return NewUrlRepositoryPG(*s)
 }
 
-func (s *service) SyncDB() {
+func (s *dbService) SyncDB() {
 	sqlDB, err := s.db.DB()
 	if err != nil {
 		log.Fatalf("Failed to get underlying sql.DB: %v", err)
@@ -71,7 +71,7 @@ func (s *service) SyncDB() {
 
 // Health checks the health of the database connection by pinging the database.
 // It returns a map with keys indicating various health statistics.
-func (s *service) Health() map[string]string {
+func (s *dbService) Health() map[string]string {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -130,7 +130,7 @@ func (s *service) Health() map[string]string {
 // It logs a message indicating the disconnection from the specific database.
 // If the connection is successfully closed, it returns nil.
 // If an error occurs while closing the connection, it returns the error.
-func (s *service) Close() error {
+func (s *dbService) Close() error {
 	sqlDB, err := s.db.DB()
 	if err != nil {
 		log.Fatalf("Failed to get underlying sql.DB: %v", err)

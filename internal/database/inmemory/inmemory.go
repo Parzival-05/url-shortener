@@ -3,7 +3,7 @@ package inmemory
 import (
 	"context"
 
-	"github.com/Parzival-05/url-shortener/internal/domain"
+	"github.com/Parzival-05/url-shortener/internal/service"
 )
 
 type InMemoryDBService struct {
@@ -27,7 +27,7 @@ func (m *InMemoryDBService) Close() error {
 func (m *InMemoryDBService) SyncDB() {
 }
 
-func (m *InMemoryDBService) NewUrlRepository() domain.UrlRepository {
+func (m *InMemoryDBService) NewUrlRepository() service.UrlRepository {
 	return NewInMemoryUrlRepository()
 }
 
@@ -46,7 +46,7 @@ func NewInMemoryUrlRepository() *InMemoryUrlRepository {
 func (m *InMemoryUrlRepository) GetID(ctx context.Context, fullUrl string) (id int64, err error) {
 	v, exists := m.urlToId[fullUrl]
 	if !exists {
-		return 0, domain.ErrUrlNotFound
+		return 0, service.ErrUrlNotFound
 	}
 	return v, nil
 }
@@ -54,7 +54,7 @@ func (m *InMemoryUrlRepository) GetID(ctx context.Context, fullUrl string) (id i
 func (m *InMemoryUrlRepository) GetUrlByID(ctx context.Context, id int64) (fullUrl string, err error) {
 	v, exists := m.idToUrl[id]
 	if !exists {
-		return "", domain.ErrUrlNotFound
+		return "", service.ErrUrlNotFound
 	}
 	return v, nil
 }

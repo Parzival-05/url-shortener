@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/Parzival-05/url-shortener/internal/domain"
 	"github.com/Parzival-05/url-shortener/internal/http_server/io_server"
+	domain "github.com/Parzival-05/url-shortener/internal/service"
 
 	"github.com/go-chi/render"
 	"github.com/gorilla/schema"

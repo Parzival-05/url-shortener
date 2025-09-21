@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Parzival-05/url-shortener/internal/domain"
+	"github.com/Parzival-05/url-shortener/internal/service"
 
 	"gorm.io/gorm"
 )
 
 type UrlRepositoryPG struct {
-	db service
+	db dbService
 }
 
-func NewUrlRepositoryPG(db service) *UrlRepositoryPG {
+func NewUrlRepositoryPG(db dbService) *UrlRepositoryPG {
 	return &UrlRepositoryPG{db: db}
 }
 
@@ -21,7 +21,7 @@ func (u *UrlRepositoryPG) GetID(ctx context.Context, fullUrl string) (id int64, 
 	url, err := gorm.G[Url](u.db.db).Where("full_url = ?", fullUrl).First(ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return 0, domain.ErrUrlNotFound
+			return 0, service.ErrUrlNotFound
 		}
 		return 0, err
 	}

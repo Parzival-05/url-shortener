@@ -1,6 +1,6 @@
 package database
 
-import "github.com/Parzival-05/url-shortener/internal/domain"
+import  "github.com/Parzival-05/url-shortener/internal/service"
 
 // DBService represents a service that interacts with a database.
 type DBService interface {
@@ -14,5 +14,5 @@ type DBService interface {
 
 	SyncDB()
 
-	NewUrlRepository() domain.UrlRepository
+	NewUrlRepository() service.UrlRepository
 }

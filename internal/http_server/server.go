@@ -11,7 +11,7 @@ import (
 	"github.com/Parzival-05/url-shortener/internal/database"
 	"github.com/Parzival-05/url-shortener/internal/database/inmemory"
 	"github.com/Parzival-05/url-shortener/internal/database/sql"
-	"github.com/Parzival-05/url-shortener/internal/domain"
+	"github.com/Parzival-05/url-shortener/internal/service"
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
@@ -52,7 +52,7 @@ func NewServer(log *zap.Logger, storageType StorageType) *http.Server {
 		db = inmemory.NewInMemoryDBService()
 	}
 	urlRepo := db.NewUrlRepository()
-	urlShortener := domain.NewUrlShortener(urlRepo, log)
+	urlShortener := service.NewUrlShortener(urlRepo, log)
 
 	NewServer := &Server{
 		port:         port,

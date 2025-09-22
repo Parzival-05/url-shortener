@@ -2,7 +2,7 @@ version: "2"
 linters:
   exclusions:
     rules:
-      - path: /**/api/**/*.go
+      - path: api/*.go
         linters:
           - goanalysis_metalinter
       - path: /*_test.go

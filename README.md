@@ -1,6 +1,6 @@
 # url-shortener
 
-A simple URL shortening service written in Go. It provides a clean HTTP API to create unique, non-sequential short links and retrieve the original URL from a shortened code.
+A simple URL shortening service written in Go. It provides a clean HTTP & gRPC API to create unique, non-sequential short links and retrieve the original URL from a shortened code.
 
 ## How It Works: The Alphabet is Your Secret Key
 This service uses the Sqids library to generate short codes. It's crucial to understand that Sqids does not use a traditional "secret key" or "salt" parameter.
@@ -26,7 +26,7 @@ The Sqids algorithm deterministically shuffles the alphabet based on its exact s
    ```
    go mod tidy
    ```
-4. Run the service (with postgres as storage):
+4. Run the service (with postgres as storage & http server):
    ```
     make docker-run
    ```
@@ -73,6 +73,8 @@ make clean
 
 
 # API Reference
+http:
+Check out Swagger UI to explore the API: http://localhost:8080/swagger/index.html (use your actual port instead of 8080)
 
-Check out Swagger UI to explore the API: http://localhost:8080/swagger/index.html
-(use your actual port instead of 8080)
+gRPC
+Use gRPC reflection or see proto files

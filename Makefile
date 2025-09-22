@@ -12,7 +12,7 @@ build:
 	@go build -o main $(ENTRYPOINT)
 
 # Run the application
-run: generate-swagger
+run: generate-proto generate-swagger
 	@echo "Running..."
 
 	@go run $(ENTRYPOINT) $(ARGS)
@@ -25,7 +25,7 @@ $(SWAGGER_FILE): $(GO_FILES)
 	@swag init -g $(ENTRYPOINT)
 
 # Create DB container
-docker-run:
+docker-run: generate-proto generate-swagger
 	@if docker compose up --build 2>/dev/null; then \
 		: ; \
 	else \

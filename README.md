@@ -26,9 +26,9 @@ The Sqids algorithm deterministically shuffles the alphabet based on its exact s
    ```
    go mod tidy
    ```
-4. Run the service (with postgres as storage & http server):
+4. Run the service (with postgres as storage & grpc server):
    ```
-    make docker-run
+   docker compose up --build --watch
    ```
 ## MakeFile
 

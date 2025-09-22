@@ -14,6 +14,6 @@ WORKDIR /app
 COPY --from=build /app/main /app/main
 EXPOSE ${PORT}
 
-ENTRYPOINT ["/app/main", "--storage", "postgres"]
+ENTRYPOINT ["/app/main", "--storage", "postgres", "--server", "grpc"]
 
 
